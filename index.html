@@ -29,88 +29,69 @@
   <div id="map" class="leaflet-map" style="height: 100vh;"></div>
 
   <script>
-    // === Custom Icon ===
-    const customPin = L.icon({
-      iconUrl: 'images/ws_pin.png', // pastikan file ini ada di folder /images
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32],
-    });
+  // Pas bagian atas sebelum map dibuat
+  const customPin = L.icon({
+    iconUrl: 'images/ws_pin.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+  });
 
-    // === Configuration ===
-    let opts = {
-      map: {
-        center: [-7.4541485122895015, 110.43695296633011],
-        zoom: 10,
-        fullscreenControl: true,
-        layersControl: true,
-        minimapControl: false,
-        searchControl: false,
-        locateControl: false,
-        pegmanControl: false,
-        resizerControl: false,
-        gestureHandling: false,
-        preferCanvas: true,
-        mapTypeId: 'satellite',
-        rotate: false,
-        zoomControl: {
-          position: 'topleft',
-        },
-      },
-      elevationControl: {
-        url: "uitr/60KM_NEW.gpx",
-        options: {
-          theme: "lightblue-theme",
-          width: 100,
-          height: 150,
-          collapsed: false,
-          autohide: false,
-          autofitBounds: true,
-          position: "bottomleft",
-          detached: true,
-          summary: false,
-          imperial: false,
-          downloadLink: false,
-          slope: "disabled",
-          speed: false,
-          acceleration: false,
-          time: false,
-          legend: true,
-          followMarker: true,
-          almostOver: true,
-          distanceMarkers: false,
-          hotline: false,
-          markerOptions: {
-            icon: customPin // pakai ikon pin kustom di marker elevation
-          }
-        },
-      },
-      layersControl: {
-        options: {
-          collapsed: false,
-        },
-      },
-    };
+  let opts = {
+    map: { /* konfigurasi peta seperti sebelumnya */ },
 
-    // === Inisialisasi Peta ===
-    let map = L.map('map', opts.map);
-    let controlElevation = L.control.elevation(opts.elevationControl.options).addTo(map);
-    let controlLayer = L.control.layers(null, null, opts.layersControl.options);
+    elevationControl: {
+      url: "uitr/60KM_NEW.gpx",
+      options: {
+        theme: "lightblue-theme",
+        width: 100,
+        height: 150,
+        collapsed: false,
+        autohide: false,
+        autofitBounds: true,
+        position: "bottomleft",
+        detached: true,
+        summary: false,
+        imperial: false,
+        downloadLink: false,
+        slope: "disabled",
+        speed: false,
+        acceleration: false,
+        time: false,
+        legend: true,
+        followMarker: true,
+        almostOver: true,
+        distanceMarkers: false,
+        hotline: false,
 
-    // === Tambahkan Layer Setelah Elevation Data Dimuat ===
-    controlElevation.on('eledata_loaded', ({ layer, name }) => {
-      controlLayer.addTo(map);
-      layer.eachLayer((trkseg) => {
-        if (trkseg.feature.geometry.type !== "Point") {
-          controlLayer.addOverlay(trkseg, trkseg.feature?.properties?.name || name);
+        // <<< markerOptions dengan custom icon harus di sini
+        markerOptions: {
+          icon: customPin
         }
-      });
+      },
+    },
+
+    layersControl: { options: { collapsed: false } },
+  };
+
+  // Inisialisasi peta
+  let map = L.map('map', opts.map);
+
+  // Buat control elevation dengan opsi yang sudah disertakan markerOptions
+  let controlElevation = L.control.elevation(opts.elevationControl.options).addTo(map);
+  let controlLayer = L.control.layers(null, null, opts.layersControl.options);
+
+  controlElevation.on('eledata_loaded', ({ layer, name }) => {
+    controlLayer.addTo(map);
+    layer.eachLayer((trkseg) => {
+      if (trkseg.feature.geometry.type !== "Point") {
+        controlLayer.addOverlay(trkseg, trkseg.feature?.properties?.name || name);
+      }
     });
+  });
 
-    // === Load GPX File ===
-    controlElevation.load(opts.elevationControl.url);
-  </script>
-
+  controlElevation.load(opts.elevationControl.url);
+</script>
   <script>
     // === Localisasi Label Elevation ===
     L.registerLocale('en:18', {
