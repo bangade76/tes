@@ -3,32 +3,41 @@
 
 <head>
   <title>MSR 60K Category</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-  <link rel="dns-prefetch" href="https://tile.openstreetmap.org">
+  <link rel="dns-prefetch" href="https://tile.openstreetmap.org" />
   <link rel="dns-prefetch preconnect" href="https://unpkg.com" />
   <link rel="preload" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" as="script">
   <link rel="preload" href="https://unpkg.com/leaflet-ui@0.6.0/dist/leaflet-ui.js" as="script">
 
   <style>@import 'css/fullpage.css';</style>
 
-  <!-- leaflet-ui -->
+  <!-- Leaflet -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-ui@0.6.0/dist/leaflet-ui.js"></script>
 
-  <!-- leaflet-gpx -->
+  <!-- GPX plugin -->
   <script src="https://unpkg.com/leaflet-gpx@1.7.0/gpx.js"></script>
 
-  <!-- leaflet-elevation -->
+  <!-- Elevation plugin -->
   <link rel="stylesheet" href="https://unpkg.com/@raruto/leaflet-elevation@2.5.1/dist/leaflet-elevation.min.css" />
   <script src="https://unpkg.com/@raruto/leaflet-elevation@2.5.1/dist/leaflet-elevation.min.js"></script>
 </head>
 
 <body>
 
-  <div id="map" class="leaflet-map"></div>
+  <div id="map" class="leaflet-map" style="height: 100vh;"></div>
 
   <script>
+    // === Custom Icon ===
+    const customPin = L.icon({
+      iconUrl: 'images/ws_pin.png', // pastikan file ini ada di folder /images
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32],
+    });
+
+    // === Configuration ===
     let opts = {
       map: {
         center: [-7.4541485122895015, 110.43695296633011],
@@ -49,7 +58,7 @@
         },
       },
       elevationControl: {
-        url: "uitr/60KM_NEW.gpx",  // GPX lokal
+        url: "uitr/60KM_NEW.gpx",
         options: {
           theme: "lightblue-theme",
           width: 100,
@@ -71,6 +80,9 @@
           almostOver: true,
           distanceMarkers: false,
           hotline: false,
+          markerOptions: {
+            icon: customPin // pakai ikon pin kustom di marker elevation
+          }
         },
       },
       layersControl: {
@@ -80,24 +92,27 @@
       },
     };
 
+    // === Inisialisasi Peta ===
     let map = L.map('map', opts.map);
-
     let controlElevation = L.control.elevation(opts.elevationControl.options).addTo(map);
     let controlLayer = L.control.layers(null, null, opts.layersControl.options);
 
-    controlElevation.on('eledata_loaded', ({layer, name}) => {
+    // === Tambahkan Layer Setelah Elevation Data Dimuat ===
+    controlElevation.on('eledata_loaded', ({ layer, name }) => {
       controlLayer.addTo(map);
       layer.eachLayer((trkseg) => {
-        if (trkseg.feature.geometry.type != "Point") {
+        if (trkseg.feature.geometry.type !== "Point") {
           controlLayer.addOverlay(trkseg, trkseg.feature?.properties?.name || name);
         }
       });
     });
 
+    // === Load GPX File ===
     controlElevation.load(opts.elevationControl.url);
   </script>
 
   <script>
+    // === Localisasi Label Elevation ===
     L.registerLocale('en:18', {
       "Acceleration": "Acceleration",
       "Altitude": "Elevation",
