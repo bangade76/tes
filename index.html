@@ -81,14 +81,12 @@
   let controlElevation = L.control.elevation(opts.elevationControl.options).addTo(map);
   let controlLayer = L.control.layers(null, null, opts.layersControl.options);
 
-  controlElevation.on('eledata_loaded', ({ layer, name }) => {
-    controlLayer.addTo(map);
-    layer.eachLayer((trkseg) => {
-      if (trkseg.feature.geometry.type !== "Point") {
-        controlLayer.addOverlay(trkseg, trkseg.feature?.properties?.name || name);
-      }
-    });
+  controlElevation.on('eledata_loaded', ({ layer }) => {
+  layer.eachLayer(pt => {
+    console.log(pt); // lihat apakah marker memiliki opsi icon
   });
+});
+
 
   controlElevation.load(opts.elevationControl.url);
 </script>
